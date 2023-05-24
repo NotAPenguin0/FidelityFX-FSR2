@@ -30,11 +30,19 @@
 extern "C" {
 #endif // #if defined(__cplusplus)
 
+    typedef struct FfxFsr2InstanceFunctionPointerTableVk {
+        PFN_vkEnumerateDeviceExtensionProperties vkEnumerateDeviceExtensionProperties = 0;
+        PFN_vkGetDeviceProcAddr vkGetDeviceProcAddr = 0;
+        PFN_vkGetPhysicalDeviceMemoryProperties vkGetPhysicalDeviceMemoryProperties = 0;
+        PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties = 0;
+        PFN_vkGetPhysicalDeviceProperties2 vkGetPhysicalDeviceProperties2 = 0;
+    } FfxFsr2InstancePointerTableVk;
+
     /// Query how much memory is required for the Vulkan backend's scratch buffer.
     ///
     /// @returns
     /// The size (in bytes) of the required scratch memory buffer for the VK backend.
-    FFX_API size_t ffxFsr2GetScratchMemorySizeVK(VkPhysicalDevice physicalDevice);
+    FFX_API size_t ffxFsr2GetScratchMemorySizeVK(VkPhysicalDevice physicalDevice, FfxFsr2InstanceFunctionPointerTableVk const* instanceFpTable);
 
     /// Populate an interface with pointers for the VK backend.
     ///
@@ -43,7 +51,7 @@ extern "C" {
     /// @param [in] scratchBuffer               A pointer to a buffer of memory which can be used by the DirectX(R)12 backend.
     /// @param [in] scratchBufferSize           The size (in bytes) of the buffer pointed to by <c><i>scratchBuffer</i></c>.
     /// @param [in] physicalDevice              The Vulkan physical device that FSR 2.0 will be executed on.
-    /// @param [in] getDeviceProcAddr           A function pointer to vkGetDeviceProcAddr which is used to obtain all the other Vulkan functions.
+    /// @param [in] instanceFpTable             A pointer to FfxFsr2InstanceFunctionPointerTableVk to obtain all other Vulkan functions.
     /// 
     /// @retval
     /// FFX_OK                                  The operation completed successfully.
@@ -56,7 +64,7 @@ extern "C" {
         void* scratchBuffer,
         size_t scratchBufferSize,
         VkPhysicalDevice physicalDevice,
-        PFN_vkGetDeviceProcAddr getDeviceProcAddr);
+        FfxFsr2InstanceFunctionPointerTableVk const* instanceFpTable);
 
     /// Create a <c><i>FfxFsr2Device</i></c> from a <c><i>VkDevice</i></c>.
     ///
