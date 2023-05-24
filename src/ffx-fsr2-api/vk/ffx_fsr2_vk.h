@@ -36,6 +36,7 @@ extern "C" {
         PFN_vkGetPhysicalDeviceMemoryProperties vkGetPhysicalDeviceMemoryProperties = 0;
         PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties = 0;
         PFN_vkGetPhysicalDeviceProperties2 vkGetPhysicalDeviceProperties2 = 0;
+        PFN_vkGetPhysicalDeviceFeatures2 vkGetPhysicalDeviceFeatures2 = 0;
     } FfxFsr2InstancePointerTableVk;
 
     /// Query how much memory is required for the Vulkan backend's scratch buffer.

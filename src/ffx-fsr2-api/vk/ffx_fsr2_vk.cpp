@@ -196,7 +196,7 @@ FfxErrorCode ffxFsr2GetInterfaceVK(
         FFX_ERROR_INVALID_POINTER);
     FFX_RETURN_ON_ERROR(instanceFpTable, FFX_ERROR_INVALID_POINTER);
     FFX_RETURN_ON_ERROR(
-        scratchBufferSize >= ffxFsr2GetScratchMemorySizeVK(physicalDevice),
+        scratchBufferSize >= ffxFsr2GetScratchMemorySizeVK(physicalDevice, instanceFpTable),
         FFX_ERROR_INSUFFICIENT_MEMORY);
 
     outInterface->fpGetDeviceCapabilities = GetDeviceCapabilitiesVK;
@@ -761,7 +761,7 @@ FfxErrorCode GetDeviceCapabilitiesVK(FfxFsr2Interface* backendInterface, FfxDevi
             physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
             physicalDeviceFeatures2.pNext = &shaderFloat18Int8Features;
 
-            backendContext->vkInstanceFunctionTable.vkGetPhysicalDeviceProperties2(backendContext->physicalDevice, &physicalDeviceFeatures2);
+            backendContext->vkInstanceFunctionTable.vkGetPhysicalDeviceFeatures2(backendContext->physicalDevice, &physicalDeviceFeatures2);
 
             deviceCapabilities->fp16Supported = (bool)shaderFloat18Int8Features.shaderFloat16;
         }
@@ -775,7 +775,7 @@ FfxErrorCode GetDeviceCapabilitiesVK(FfxFsr2Interface* backendInterface, FfxDevi
             physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
             physicalDeviceFeatures2.pNext = &accelerationStructureFeatures;
 
-            backendContext->vkInstanceFunctionTable.vkGetPhysicalDeviceProperties2(backendContext->physicalDevice, &physicalDeviceFeatures2);
+            backendContext->vkInstanceFunctionTable.vkGetPhysicalDeviceFeatures2(backendContext->physicalDevice, &physicalDeviceFeatures2);
 
             deviceCapabilities->raytracingSupported = (bool)accelerationStructureFeatures.accelerationStructure;
         }
@@ -914,11 +914,23 @@ FfxErrorCode CreateBackendContextVK(FfxFsr2Interface* backendInterface, FfxDevic
         VkMemoryAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = FSR2_UBO_MEMORY_BLOCK_SIZE;
-        allocInfo.memoryTypeIndex = findMemoryTypeIndex(backendContext->physicalDevice, memRequirements, requiredMemoryProperties, backendContext->uboMemoryProperties);
+        allocInfo.memoryTypeIndex = findMemoryTypeIndex(
+            &backendContext->vkInstanceFunctionTable, 
+            backendContext->physicalDevice, 
+            memRequirements, 
+            requiredMemoryProperties, 
+            backendContext->uboMemoryProperties
+        );
 
         if (allocInfo.memoryTypeIndex == UINT32_MAX) {
             requiredMemoryProperties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-            allocInfo.memoryTypeIndex = findMemoryTypeIndex(backendContext->physicalDevice, memRequirements, requiredMemoryProperties, backendContext->uboMemoryProperties);
+            allocInfo.memoryTypeIndex = findMemoryTypeIndex(
+                &backendContext->vkInstanceFunctionTable, 
+                backendContext->physicalDevice, 
+                memRequirements, 
+                requiredMemoryProperties, 
+                backendContext->uboMemoryProperties
+            );
 
             if (allocInfo.memoryTypeIndex == UINT32_MAX) {
                 return FFX_ERROR_BACKEND_API_ERROR;
@@ -1114,7 +1126,13 @@ FfxErrorCode CreateResourceVK(
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = findMemoryTypeIndex(backendContext->physicalDevice, memRequirements, requiredMemoryProperties, res->memoryProperties);
+    allocInfo.memoryTypeIndex = findMemoryTypeIndex(
+        &backendContext->vkInstanceFunctionTable, 
+        backendContext->physicalDevice, 
+        memRequirements,
+        requiredMemoryProperties,
+        res->memoryProperties
+    );
 
     if (allocInfo.memoryTypeIndex == UINT32_MAX) {
         return FFX_ERROR_BACKEND_API_ERROR;
