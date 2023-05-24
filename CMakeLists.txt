@@ -75,17 +75,20 @@ add_compile_definitions($<$<CONFIG:RelWithDebInfo>:USE_PIX>)
 # override build options in ffx-fsr2-api cmake
 option (FFX_FSR2_API_DX12 "Build FSR 2.0 DX12 backend" ${GFX_API_DX12})
 option (FFX_FSR2_API_VK "Build FSR 2.0 Vulkan backend" ${GFX_API_VK})
+option (FFX_FSR2_BUILD_SAMPLE_BACKENDS "Build FSR2.0 Sample backends" OFF)
 
 # reference libs used by both backends
 add_subdirectory(libs/cauldron)
 add_subdirectory(src/Common)
 add_subdirectory(src/ffx-fsr2-api)
 
-if(GFX_API_VK)
-    find_package(Vulkan REQUIRED)
-    add_subdirectory(src/VK)
-endif()
-if(GFX_API_DX12)
-    add_subdirectory(src/DX12)
+if (${FFX_FSR2_BUILD_SAMPLE_BACKENDS})
+    if(GFX_API_VK)
+        find_package(Vulkan REQUIRED)
+        add_subdirectory(src/VK)
+    endif()
+    if(GFX_API_DX12)
+        add_subdirectory(src/DX12)
+    endif()
 endif()
 
